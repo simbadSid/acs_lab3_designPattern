@@ -1,12 +1,13 @@
+package general;
+
 import java.util.HashMap;
-import java.util.LinkedList;
 
 
 
 
 
 
-public class ServerImpl implements ChatServer_itf
+public class ServerImpl implements Server_itf
 {
 // ---------------------------------
 // Attributs
@@ -34,20 +35,27 @@ public class ServerImpl implements ChatServer_itf
 	}
 
 	@Override
-	public void unregister(Client_itf c)
+	public void unregister(Client_itf c) throws ExceptionUnknownUser
 	{
 		String pseudo = this.getUserPseudo(c);
-		if (pseudo == null) throw new RuntimeException("Unknown user");
+
+		if (pseudo == null) throw new ExceptionUnknownUser();
 		this.loggedUser.remove(pseudo);
 	}
 
 	@Override
-	public void sndMsg(Client_itf c, String msg)
+	public void sndMsg(Client_itf c, String msg) throws ExceptionUnknownUser
 	{
 		String pseudo = this.getUserPseudo(c);
-		if (pseudo == null) throw new RuntimeException("Unknown user");
+		if (pseudo == null) throw new ExceptionUnknownUser();
 
-		System.out.println("User \"" + pseudo + "\" has sent the message: \"" + msg);
+		for (String receiverClientName: this.loggedUser.keySet())
+		{
+			if (receiverClientName.equals(pseudo)) continue;
+			Client_itf receiverClient = this.loggedUser.get(receiverClientName);
+			receiverClient.notifyForeignClientAction(pseudo, "Send message: \"" + msg + "\"");
+		}
+//		System.out.println("User \"" + pseudo + "\" has sent the message: \"" + msg);
 	}
 
 // ---------------------------------
