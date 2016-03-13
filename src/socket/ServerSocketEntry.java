@@ -1,12 +1,10 @@
 package socket;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import general.ExceptionServerRefused;
 import general.ServerImpl;
 import general.Server_itf;
 
@@ -21,10 +19,14 @@ public class ServerSocketEntry implements Runnable
 // ---------------------------------
 // Attributs
 // ---------------------------------
-	public static final int		port				= 2222;
-	public static final String	ACTION_REGISTER		= "register";
-	public static final String	ACTION_UNREGISTER	= "unregister";
-	public static final String	ACTION_SEND_MESSAGE	= "sendMessage";
+	public static final int		DEFAULT_PORT			= 2222;
+	public static final String	DEFAULT_IP				= "127.0.0.1";
+
+	public static final String	ACTION_REGISTER			= "register";
+	public static final String	ACTION_UNREGISTER		= "unregister";
+	public static final String	ACTION_SEND_MESSAGE		= "sendMessage";
+	public static final String	ACTION_RESULT_DONE		= "OK";
+	public static final String	ACTION_RESULT_REFUSED	= "REFUSED";
 
 	private Server_itf		server;
 	private ServerSocket	serverSocket;
@@ -35,7 +37,7 @@ public class ServerSocketEntry implements Runnable
 	public ServerSocketEntry(Server_itf server) throws IOException
 	{
 		this.server			= new ServerImpl();
-		this.serverSocket	= new ServerSocket(port);
+		this.serverSocket	= new ServerSocket(DEFAULT_PORT);
 	}
 
 // ---------------------------------
@@ -44,24 +46,24 @@ public class ServerSocketEntry implements Runnable
 	@Override
 	public void run()
 	{
-		Socket clientSocket;
-		PrintWriter out	= null;
-		BufferedReader	in = null;
+		SocketReaderWriter readerWritter = null;
 
-	    while(true)
+		System.out.println("Server ready...");
+
+		while(true)
 		{
 	    	try
 	    	{
-				clientSocket	= serverSocket.accept();
-			    out				= new PrintWriter(clientSocket.getOutputStream(), true);
-			    in				= new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+	    		Socket clientSocket	= serverSocket.accept();
+				System.out.println("Server accepted new connection from \"" + clientSocket.getInetAddress() + "\" ...");
+				readerWritter = new SocketReaderWriter(clientSocket);
 	    	}
 	    	catch(Exception e)
 	    	{
 	    		e.printStackTrace();
-	    		System.exit(0);
+	    		continue;
 	    	}
-	    	Thread t = new ServeerCommunicationThread(in, out);
+	    	Thread t = new ServeerCommunicationThread(readerWritter);
 	    	t.start();
 		}
 	}
@@ -72,14 +74,12 @@ public class ServerSocketEntry implements Runnable
 	private class ServeerCommunicationThread extends Thread
 	{
 		// Attributes
-	    private PrintWriter		out;
-	    private BufferedReader	in;
+		private SocketReaderWriter readerWriter;
 
 	    // Builder
-		public ServeerCommunicationThread(BufferedReader in, PrintWriter out)
+		public ServeerCommunicationThread(SocketReaderWriter readerWriter)
 		{
-			this.in		= in;
-			this.out	= out;
+			this.readerWriter = readerWriter;
 		}
 
 		// Local methods
@@ -87,38 +87,54 @@ public class ServerSocketEntry implements Runnable
 	    public void run()
 		{
 			String action;
-			RemoteSocketClient c = new RemoteSocketClient(in, out);
+			RemoteSocketClient c = new RemoteSocketClient(readerWriter);
 
-			try
+			System.out.println("Server thread launched ...");
+			while(true)
 			{
-				while((action = in.readLine()) != null)
+				try
 				{
-					if		(action.equals(ACTION_REGISTER))
+					while((action = readerWriter.readLine()) != null)
 					{
-						String pseudo = in.readLine();
-						boolean res = server.register(c, pseudo);
-						out.write(""+res);
+						System.out.println("Server received action \"" + action + "\" ...");
+	
+						if		(action.equals(ACTION_REGISTER))
+						{
+							String pseudo = readerWriter.readLine();
+							boolean res = server.register(c, pseudo);
+							readerWriter.writeLine(""+res);
+						}
+						else if	(action.equals(ACTION_UNREGISTER))
+						{
+							server.unregister(c);
+						}
+						else if	(action.equals(ACTION_SEND_MESSAGE))
+						{
+							String msg = readerWriter.readLine();
+							System.out.println("\t" + msg);
+							server.sndMsg(c, msg);
+						}
+						else
+						{
+							System.out.println("*** Unknown action " + action + " ***");
+							throw new Exception();
+						}
+						readerWriter.writeLine(ACTION_RESULT_DONE);
 					}
-					else if	(action.equals(ACTION_UNREGISTER))
-					{
-						server.unregister(c);
-					}
-					else if	(action.equals(ACTION_SEND_MESSAGE))
-					{
-						String msg = in.readLine();
-						server.sndMsg(c, msg);
-					}
-					else
-					{
-						System.out.println("*** Unknown action " + action + " ***");
-						return;
-					}
+					System.out.println("Server thread removed...");
+					return;
 				}
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				return;
+				catch (ExceptionServerRefused e)
+				{
+					readerWriter.writeLine(ACTION_RESULT_REFUSED);
+					System.out.println("Server action canceled (exception raised)...");
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					System.out.println("Server thread removed (exception raised)...");
+					return;
+				}
 			}
 		}
 	}

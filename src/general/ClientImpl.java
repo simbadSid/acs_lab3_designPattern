@@ -40,13 +40,13 @@ public class ClientImpl implements Client_itf
 // Local methods
 // ---------------------------------
 	@Override
-	public void unregister() throws ExceptionUnknownUser
+	public void unregister() throws ExceptionUnknownUser, ExceptionServerRefused
 	{
 		this.server.unregister(this);
 	}
 
 	@Override
-	public void sndMsg(String msg) throws ExceptionUnknownUser
+	public void sndMsg(String msg) throws ExceptionUnknownUser, ExceptionServerRefused
 	{
 		this.server.sndMsg(this, msg);
 	}

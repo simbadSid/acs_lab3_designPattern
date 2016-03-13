@@ -3,8 +3,6 @@ package socket;
 import general.Client_itf;
 import general.ExceptionUnknownUser;
 
-import java.io.BufferedReader;
-import java.io.PrintWriter;
 
 
 
@@ -14,18 +12,16 @@ import java.io.PrintWriter;
 public class RemoteSocketClient implements Client_itf
 {
 // ---------------------------------
-// Attributs
+// Attributes
 // ---------------------------------
-	private BufferedReader	in;
-	private PrintWriter		out;
+	private SocketReaderWriter readerWriter;
 
 // ---------------------------------
 // Builder
 // ---------------------------------
-	public RemoteSocketClient(BufferedReader in, PrintWriter out)
+	public RemoteSocketClient(SocketReaderWriter readerWriter)
 	{
-		this.in		= in;
-		this.out	= out;
+		this.readerWriter = readerWriter;
 	}
 
 // ---------------------------------
@@ -46,14 +42,7 @@ public class RemoteSocketClient implements Client_itf
 	@Override
 	public void notifyForeignClientAction(String client, String action)
 	{
-		try
-		{
-			out.write(client);
-			out.write(action);
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+//TODO		this.readerWriter.writeLine(client);
+//TODO		this.readerWriter.writeLine(action);
 	}
 }
