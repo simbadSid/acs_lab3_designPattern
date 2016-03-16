@@ -19,7 +19,5 @@ public class TestServer
 		Server_itf			server		= new ServerSingleton();
 		ServerSocketEntry	serverEntry	= new ServerSocketEntry(server);
 		SwingUtilities.invokeLater(serverEntry);
-
-	
 	}
 }

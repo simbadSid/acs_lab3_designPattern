@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import patternProxy.ProxyClient;
+import patternProxy.RemoteClient;
 import general.ExceptionUnknownUser;
 import general.ServerImpl;
 import general.Server_itf;
@@ -88,7 +88,7 @@ public class ServerSocketEntry implements Runnable
 	    public void run()
 		{
 			String action;
-			ProxyClient c = new ProxyClient();
+			RemoteClient c = new RemoteClient();
 			boolean successfullyRegistered = false;
 			boolean endSession = false;
 

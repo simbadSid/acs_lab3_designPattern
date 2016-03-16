@@ -15,7 +15,7 @@ import general.Server_itf;
 
 
 
-public class ProxyServer implements Server_itf, Runnable
+public class RemoteServer implements Server_itf, Runnable
 {
 // ---------------------------------
 // Attributes
@@ -36,18 +36,18 @@ public class ProxyServer implements Server_itf, Runnable
 // ---------------------------------
 // Builder
 // ---------------------------------
-	public ProxyServer()
+	public RemoteServer()
 	{
 		this(ServerSocketEntry.DEFAULT_IP, ServerSocketEntry.DEFAULT_PORT);
 	}
 
-	public ProxyServer(String serverIP, int serverPort)
+	public RemoteServer(String serverIP, int serverPort)
 	{
 		this.serverIP		= new String(serverIP);
 		this.serverPort		= serverPort;
 		this.callBackIP		= "localhost";		// TODO
-		this.callBackPort	= ProxyServer.defaultcallBackPort + ProxyServer.nbrCreatedClient;
-		ProxyServer.nbrCreatedClient ++;
+		this.callBackPort	= RemoteServer.defaultcallBackPort + RemoteServer.nbrCreatedClient;
+		RemoteServer.nbrCreatedClient ++;
 	}
 
 // ---------------------------------

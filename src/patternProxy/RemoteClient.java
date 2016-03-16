@@ -13,7 +13,7 @@ import general.Client_itf;
 
 
 
-public class ProxyClient implements Client_itf
+public class RemoteClient implements Client_itf
 {
 // ---------------------------------
 // Attributes

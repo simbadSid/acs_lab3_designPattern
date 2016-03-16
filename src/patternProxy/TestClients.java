@@ -30,12 +30,12 @@ public class TestClients
 	public static void main(String[] args) throws ExceptionUnknownUser, ExceptionServerRefused
 	{
 		Client_itf[] clientTab = new Client_itf[nbrClient];
-		ProxyServer[] localServerRef = new ProxyServer[nbrClient];
+		RemoteServer[] localServerRef = new RemoteServer[nbrClient];
 		Random rnd = new Random();
 
 		for (int i=0; i<nbrClient; i++)
 		{
-			localServerRef[i] = new ProxyServer(serverIP, serverPort);
+			localServerRef[i] = new RemoteServer(serverIP, serverPort);
 			clientTab[i] = new ClientImpl(localServerRef[i], "client"+i);
 			localServerRef[i].launchCallbackThread(clientTab[i]);
 			clientTab[i].register();
