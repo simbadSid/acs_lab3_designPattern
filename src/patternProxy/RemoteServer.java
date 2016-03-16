@@ -41,7 +41,7 @@ public class RemoteServer implements Server_itf, Runnable
 		this(ServerSocketEntry.DEFAULT_IP, ServerSocketEntry.DEFAULT_PORT);
 	}
 
-	public RemoteServer(String serverIP, int serverPort)
+	public RemoteServer(String serverIP, Integer serverPort)
 	{
 		this.serverIP		= new String(serverIP);
 		this.serverPort		= serverPort;

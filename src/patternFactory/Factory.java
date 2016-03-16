@@ -17,16 +17,16 @@ public class Factory
 // --------------------------------
 // Attributes
 // --------------------------------
-	public static final String	clientType_local	= "ClientImpl";
-	public static final String	clientType_remote	= "RemoteClient";
-	public static final String	serverType_local	= "ServerImpl";
-	public static final String	serverType_remote	= "RemoteServer";
+	public static final String	clientType_local	= "general.ClientImpl";
+	public static final String	clientType_remote	= "patternProxy.RemoteClient";
+	public static final String	serverType_local	= "general.ServerImpl";
+	public static final String	serverType_remote	= "patternProxy.RemoteServer";
 
 // --------------------------------
 // Local methods
 // --------------------------------
 	public static Client_itf newClientInstance(String clientType, Server_itf server, String pseudo,
-												String clientCallcackIP, int clientCallbackPort) throws ClassNotFoundException
+												String clientCallcackIP, Integer clientCallbackPort) throws ClassNotFoundException
 	{
 		try
 		{
@@ -55,7 +55,7 @@ public class Factory
 		}
 	}
 
-	public static Server_itf newServerInstance(String serverType, String serverIP, int serverPort) throws ClassNotFoundException
+	public static Server_itf newServerInstance(String serverType, String serverIP, Integer serverPort) throws ClassNotFoundException
 	{
 		try
 		{

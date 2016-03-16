@@ -23,7 +23,7 @@ public class RemoteClient implements Client_itf
 // ---------------------------------
 // Local methods
 // ---------------------------------
-	public void connectToClientCallBack(String clientCallBackIP, int clientCallBackPort) throws UnknownHostException, IOException
+	public void connectToClientCallBack(String clientCallBackIP, Integer clientCallBackPort) throws UnknownHostException, IOException
 	{
 		Socket socket		= new Socket(clientCallBackIP, clientCallBackPort);
 		this.readerWriter	= new SocketReaderWriter(socket);

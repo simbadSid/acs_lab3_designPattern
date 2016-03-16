@@ -1,16 +1,8 @@
 package patternFactory;
 
-import java.util.Random;
-
-import general.ClientImpl;
-import general.Client_itf;
-import general.ExceptionServerRefused;
-import general.Server_itf;
-import patternProxy.ProxyServer;
-import patternSingleton.ServerSingleton;
 
 public class TestClients {
-
+/*
 	private static final int	nbrClient	= 6;
 	private static final String	serverIP	= "127.0.0.1";
 	private static final int	serverPort	= 2222;
@@ -48,5 +40,5 @@ public class TestClients {
 			clientTab[i].unregister();
 		}
 	}
-
+*/
 }
