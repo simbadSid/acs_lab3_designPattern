@@ -6,7 +6,7 @@ import general.ClientImpl;
 import general.Client_itf;
 import general.ExceptionServerRefused;
 import general.ExceptionUnknownUser;
-import general.Server_itf;
+
 
 
 
@@ -29,12 +29,15 @@ public class TestClients
 	public static void main(String[] args) throws ExceptionUnknownUser, ExceptionServerRefused
 	{
 		Client_itf[] clientTab = new Client_itf[nbrClient];
+		ClientSocketEntry[] localServerRef = new ClientSocketEntry[nbrClient];
 		Random rnd = new Random();
 
 		for (int i=0; i<nbrClient; i++)
 		{
-			Server_itf server = new ClientSocketEntry(serverIP, serverPort);
-			clientTab[i] = new ClientImpl(server, "client"+i);
+			localServerRef[i] = new ClientSocketEntry(serverIP, serverPort);
+			clientTab[i] = new ClientImpl(localServerRef[i], "client"+i);
+			localServerRef[i].launchCallbackThread(clientTab[i]);
+			clientTab[i].register();
 		}
 
 		for (int i=0; i<nbrClient; i++)
@@ -43,6 +46,7 @@ public class TestClients
 			for (int j=0; j<nbrMsg; j++)
 				clientTab[i].sndMsg("Message from " + i);
 			clientTab[i].unregister();
+			localServerRef[i].stopCallBackThread();
 		}
 
 	}

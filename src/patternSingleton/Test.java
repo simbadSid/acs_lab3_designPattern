@@ -32,6 +32,7 @@ public class Test
 		{
 			Server_itf server = ServerSingleton.getInstance();	// The server is re implemented on purpose
 			clientTab[i] = new ClientImpl(server, "client"+i);
+			clientTab[i].register();
 		}
 
 		for (int i=0; i<nbrClient; i++)

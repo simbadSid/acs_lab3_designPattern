@@ -25,20 +25,24 @@ public class ClientImpl implements Client_itf
 // ---------------------------------
 // Builder
 // ---------------------------------
-	public ClientImpl(Server_itf server, String clientPseudo) throws RuntimeException
+	public ClientImpl(Server_itf server, String clientPseudo)
 	{
 		this.server			= server;
 		this.clientPseudo	= new String(clientPseudo);
 		this.initClientTerminal();
-
-		boolean test = server.register(this, clientPseudo);
-		if (!test)
-			throw new RuntimeException("Client " + clientPseudo + " can't register into the server");
 	}
 
 // ---------------------------------
 // Local methods
 // ---------------------------------
+	@Override
+	public void register() throws ExceptionServerRefused
+	{
+		boolean test = server.register(this, clientPseudo);
+		if (!test)
+			throw new ExceptionServerRefused();
+	}
+
 	@Override
 	public void unregister() throws ExceptionUnknownUser, ExceptionServerRefused
 	{

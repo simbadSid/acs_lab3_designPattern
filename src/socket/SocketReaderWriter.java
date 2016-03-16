@@ -13,7 +13,7 @@ import java.net.Socket;
 public class SocketReaderWriter
 {
 // ---------------------------------
-// Attributs
+// Attributes
 // ---------------------------------
 	private Socket			socket;
 	private PrintWriter		out;

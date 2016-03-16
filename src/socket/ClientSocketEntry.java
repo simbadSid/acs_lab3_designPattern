@@ -1,5 +1,6 @@
 package socket;
 
+import java.net.ServerSocket;
 import java.net.Socket;
 import general.Client_itf;
 import general.ExceptionServerRefused;
@@ -11,32 +12,116 @@ import general.Server_itf;
 
 
 
-public class ClientSocketEntry implements Server_itf
+public class ClientSocketEntry implements Server_itf, Runnable
 {
 // ---------------------------------
 // Attributes
 // ---------------------------------
-	private String				serverIP;
+	private String				serverIP;					//Used by the client thread
 	private int					serverPort;
 	private SocketReaderWriter	readerWriter;
+	private Client_itf			localClient;
+
+	private static final int	defaultcallBackPort = 3333;	// Used by the call back thread: react to server calls
+	private static int			nbrCreatedClient	= 0;
+	private String				callBackIP;
+	private int					callBackPort;
+	private SocketReaderWriter	callBackReaderWriter;
+	private boolean				callBackInitialized	= false;
+	private final Object		callBackLock		= new Object();
 
 // ---------------------------------
 // Builder
 // ---------------------------------
 	public ClientSocketEntry()
 	{
-		this.serverIP	= ServerSocketEntry.DEFAULT_IP;
-		this.serverPort	= ServerSocketEntry.DEFAULT_PORT;
+		this(ServerSocketEntry.DEFAULT_IP, ServerSocketEntry.DEFAULT_PORT);
 	}
+
 	public ClientSocketEntry(String serverIP, int serverPort)
 	{
-		this.serverIP	= new String(serverIP);
-		this.serverPort	= serverPort;
+		this.serverIP		= new String(serverIP);
+		this.serverPort		= serverPort;
+		this.callBackIP		= "localhost";		// TODO
+		this.callBackPort	= ClientSocketEntry.defaultcallBackPort + ClientSocketEntry.nbrCreatedClient;
+		ClientSocketEntry.nbrCreatedClient ++;
+	}
+
+// ---------------------------------
+// Call back methods: Reacts each time the server
+// ---------------------------------
+	@Override
+	public void run()
+	{
+		ServerSocket serverSocket = null;
+		Socket callBackSocket;
+		String pseudo	= "Internal agent";
+		String msg1		= "Initialized client call back listening socket...";
+		String msg2		= "Initialized client call back connection with server...";
+
+    	try
+    	{
+			serverSocket = new ServerSocket(callBackPort);					// Initialize the call back connection
+			this.localClient.notifyForeignClientAction(pseudo, msg1);
+			synchronized(this.callBackLock)
+			{
+				this.callBackInitialized = true;
+				this.callBackLock.notifyAll();								// Tell the client that it can start
+			}
+
+			callBackSocket = serverSocket.accept();							//		with the server
+			serverSocket.close();
+			this.localClient.notifyForeignClientAction(pseudo, msg2);
+			this.callBackReaderWriter = new SocketReaderWriter(callBackSocket);
+
+			while(true)														// React to each action of the server
+			{
+				String client	= this.callBackReaderWriter.readLine();
+				String action	= this.callBackReaderWriter.readLine();
+				if ((client == null) || (action == null))
+					return;
+				this.localClient.notifyForeignClientAction(client, action);
+			}
+    	}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
 	}
 
 // ---------------------------------
 // Local methods
 // ---------------------------------
+	public void launchCallbackThread(Client_itf localClient)
+	{
+		this.localClient	= localClient;
+
+		Thread t = new Thread(this);
+		t.start();
+
+		try												// Wait for the call back thread to be initialized
+		{												//		and its waiting port open
+			synchronized(this.callBackLock)
+			{
+				while(this.callBackInitialized == false)
+				{
+					this.callBackLock.wait();
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException("");
+		}
+	}
+
+	public void stopCallBackThread()
+	{
+		this.callBackReaderWriter.close();
+	}
+
 	@Override
 	public boolean register(Client_itf c, String pseudo)
 	{
@@ -51,6 +136,8 @@ public class ClientSocketEntry implements Server_itf
 			this.readerWriter	= new SocketReaderWriter(socket);
 			this.readerWriter.writeLine(ServerSocketEntry.ACTION_REGISTER);
 			this.readerWriter.writeLine(pseudo);
+			this.readerWriter.writeLine(this.callBackIP);
+			this.readerWriter.writeLine(""+this.callBackPort);
 			serverAnswer		= this.readerWriter.readLine();
 			if (serverAnswer == null) throw new ExceptionServerRefused();
 			res = Boolean.parseBoolean(serverAnswer);

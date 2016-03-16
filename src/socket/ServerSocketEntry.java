@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import general.ExceptionServerRefused;
+import general.ExceptionUnknownUser;
 import general.ServerImpl;
 import general.Server_itf;
 
@@ -87,7 +87,9 @@ public class ServerSocketEntry implements Runnable
 	    public void run()
 		{
 			String action;
-			RemoteSocketClient c = new RemoteSocketClient(readerWriter);
+			RemoteSocketClient c = new RemoteSocketClient();
+			boolean successfullyRegistered = false;
+			boolean endSession = false;
 
 			System.out.println("Server thread launched ...");
 			while(true)
@@ -100,16 +102,27 @@ public class ServerSocketEntry implements Runnable
 	
 						if		(action.equals(ACTION_REGISTER))
 						{
-							String pseudo = readerWriter.readLine();
+							String pseudo			= readerWriter.readLine();
+							String clientCallBackIP	= readerWriter.readLine();
+							int clientCallBackPort	= Integer.parseInt(readerWriter.readLine());
+							c.connectToClientCallBack(clientCallBackIP, clientCallBackPort);
 							boolean res = server.register(c, pseudo);
 							readerWriter.writeLine(""+res);
+							successfullyRegistered = true;
 						}
 						else if	(action.equals(ACTION_UNREGISTER))
 						{
+							if (successfullyRegistered == false)
+								throw new ExceptionUnknownUser();
 							server.unregister(c);
+							c.closeconnectionToClientCallBack();
+							successfullyRegistered = false;
+							endSession = true;
 						}
 						else if	(action.equals(ACTION_SEND_MESSAGE))
 						{
+							if (successfullyRegistered == false)
+								throw new ExceptionUnknownUser();
 							String msg = readerWriter.readLine();
 							System.out.println("\t" + msg);
 							server.sndMsg(c, msg);
@@ -120,18 +133,24 @@ public class ServerSocketEntry implements Runnable
 							throw new Exception();
 						}
 						readerWriter.writeLine(ACTION_RESULT_DONE);
+						if (endSession == true)
+							break;
 					}
 					System.out.println("Server thread removed...");
 					return;
 				}
-				catch (ExceptionServerRefused e)
-				{
-					readerWriter.writeLine(ACTION_RESULT_REFUSED);
-					System.out.println("Server action canceled (exception raised)...");
-				}
 				catch (Exception e)
 				{
 					e.printStackTrace();
+					readerWriter.writeLine(ACTION_RESULT_REFUSED);
+					if (successfullyRegistered)
+					try
+					{
+						server.unregister(c);
+					}
+					catch (Exception e1)
+					{
+					}
 					System.out.println("Server thread removed (exception raised)...");
 					return;
 				}
