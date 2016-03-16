@@ -1,7 +1,10 @@
-package socket;
+package patternProxy;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import socket.ServerSocketEntry;
+import socket.SocketReaderWriter;
 import general.Client_itf;
 import general.ExceptionServerRefused;
 import general.Server_itf;
@@ -12,7 +15,7 @@ import general.Server_itf;
 
 
 
-public class ClientSocketEntry implements Server_itf, Runnable
+public class ProxyServer implements Server_itf, Runnable
 {
 // ---------------------------------
 // Attributes
@@ -33,18 +36,18 @@ public class ClientSocketEntry implements Server_itf, Runnable
 // ---------------------------------
 // Builder
 // ---------------------------------
-	public ClientSocketEntry()
+	public ProxyServer()
 	{
 		this(ServerSocketEntry.DEFAULT_IP, ServerSocketEntry.DEFAULT_PORT);
 	}
 
-	public ClientSocketEntry(String serverIP, int serverPort)
+	public ProxyServer(String serverIP, int serverPort)
 	{
 		this.serverIP		= new String(serverIP);
 		this.serverPort		= serverPort;
 		this.callBackIP		= "localhost";		// TODO
-		this.callBackPort	= ClientSocketEntry.defaultcallBackPort + ClientSocketEntry.nbrCreatedClient;
-		ClientSocketEntry.nbrCreatedClient ++;
+		this.callBackPort	= ProxyServer.defaultcallBackPort + ProxyServer.nbrCreatedClient;
+		ProxyServer.nbrCreatedClient ++;
 	}
 
 // ---------------------------------
@@ -91,7 +94,7 @@ public class ClientSocketEntry implements Server_itf, Runnable
 	}
 
 // ---------------------------------
-// Local methods
+// Callback thread management
 // ---------------------------------
 	public void launchCallbackThread(Client_itf localClient)
 	{
@@ -122,6 +125,9 @@ public class ClientSocketEntry implements Server_itf, Runnable
 		this.callBackReaderWriter.close();
 	}
 
+// ---------------------------------
+// Local methods
+// ---------------------------------
 	@Override
 	public boolean register(Client_itf c, String pseudo)
 	{

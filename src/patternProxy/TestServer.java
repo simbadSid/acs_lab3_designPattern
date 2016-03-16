@@ -1,10 +1,9 @@
-package socket;
+package patternProxy;
 
 import java.io.IOException;
 import javax.swing.SwingUtilities;
-
 import patternSingleton.ServerSingleton;
-import general.ServerImpl;
+import socket.ServerSocketEntry;
 import general.Server_itf;
 
 

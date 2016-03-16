@@ -1,6 +1,7 @@
-package socket;
+package patternProxy;
 
 import java.util.Random;
+
 
 import general.ClientImpl;
 import general.Client_itf;
@@ -29,12 +30,12 @@ public class TestClients
 	public static void main(String[] args) throws ExceptionUnknownUser, ExceptionServerRefused
 	{
 		Client_itf[] clientTab = new Client_itf[nbrClient];
-		ClientSocketEntry[] localServerRef = new ClientSocketEntry[nbrClient];
+		ProxyServer[] localServerRef = new ProxyServer[nbrClient];
 		Random rnd = new Random();
 
 		for (int i=0; i<nbrClient; i++)
 		{
-			localServerRef[i] = new ClientSocketEntry(serverIP, serverPort);
+			localServerRef[i] = new ProxyServer(serverIP, serverPort);
 			clientTab[i] = new ClientImpl(localServerRef[i], "client"+i);
 			localServerRef[i].launchCallbackThread(clientTab[i]);
 			clientTab[i].register();

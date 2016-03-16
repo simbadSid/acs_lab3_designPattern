@@ -1,12 +1,11 @@
-package socket;
+package patternProxy;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import socket.SocketReaderWriter;
 import general.Client_itf;
-import general.ExceptionServerRefused;
-import general.ExceptionUnknownUser;
 
 
 
@@ -14,13 +13,12 @@ import general.ExceptionUnknownUser;
 
 
 
-public class RemoteSocketClient implements Client_itf
+public class ProxyClient implements Client_itf
 {
 // ---------------------------------
 // Attributes
 // ---------------------------------
 	private SocketReaderWriter readerWriter;
-
 
 // ---------------------------------
 // Local methods
@@ -37,21 +35,21 @@ public class RemoteSocketClient implements Client_itf
 	}
 
 	@Override
-	public void register() throws ExceptionServerRefused
+	public void register()
 	{
-		throw new RuntimeException("Un implemented method");
+		throw new RuntimeException("Can't be called from local reference");
 	}
 
 	@Override
-	public void unregister() throws ExceptionUnknownUser
+	public void unregister()
 	{
-		throw new RuntimeException("Un implemented method");
+		throw new RuntimeException("Can't be called from local reference");
 	}
 
 	@Override
-	public void sndMsg(String msg) throws ExceptionUnknownUser
+	public void sndMsg(String msg)
 	{
-		throw new RuntimeException("Un implemented method");
+		throw new RuntimeException("Can't be called from local reference");
 	}
 
 	@Override
